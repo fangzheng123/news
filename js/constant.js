@@ -1,6 +1,6 @@
 
 
-IP = "http://10.203.31.249:8002";
+IP = "http://124.16.81.18:8002";
 
 //获取新闻分类列表
 GET_CATEGORY_LIST = IP + "/GetClass/getClass";
@@ -16,3 +16,7 @@ GET_RECOMMEND_LIST = IP + "/Recommend/recommend";
 
 //相似新闻查询
 GET_SIMILARITY_LIST = IP + "/SimilarNews/similar_news";
+
+//获取新闻评论
+GET_COMMENT_LIST = IP + "/GetComment/get_comment";
+

@@ -36,14 +36,22 @@ ul.category_list li a:hover {
     color: #e54724;
 }
 
-.comment_dislike {
-    float: right;
-    color: #000;
-}
-
 .source_website {
     float: right;
     color: #000;
 }
+
+span.keyword {
+    color: #e54724;
+}
+
+.comment_list {
+    cursor: pointer;
+}
+
+.comment_content {
+    margin-bottom: 40px;
+}
+
 
 

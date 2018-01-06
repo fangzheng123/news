@@ -5,7 +5,7 @@
 
 $(document).ready(function() {
     var categoryName = "国内";
-    var searchContent;
+    var searchContent = "";
     var sort_mode = 0;
     var page = 0;
     var count = 10;
@@ -15,6 +15,9 @@ $(document).ready(function() {
     $("ul.category_list li a").on("click", function() {
         $(this).parent().parent().children().children().css("color", "#080808");
         $(this).css("color", "#6392C6");
+
+        //清空搜索关键词
+        searchContent = "";
 
         // 获取分类关键词
         categoryName = $(this).text();
@@ -44,13 +47,28 @@ $(document).ready(function() {
         $(this).parent().children().removeClass("active");
         $(this).parent().children("a").eq(index-1).addClass("active");
 
-        var params = {
-            key_word: categoryName,
-            sort_mode:sort_mode,
-            page_num: (index - 1) + "",
-            count: count + ""
-        };
-        netUtil(params, GET_CATEGORY_LIST, "post", getNewsList);
+        var url;
+        if(searchContent == "") {
+            var params = {
+                key_word: categoryName,
+                sort_mode:sort_mode,
+                page_num: (index - 1) + "",
+                count: count + ""
+            };
+
+            url = GET_CATEGORY_LIST;
+        } else {
+            var params = {
+                query_text: searchContent,
+                page_num: (index - 1) + "",
+                count: count + "",
+                sort_mode: sort_mode
+            };
+
+            url = GET_SEARCH_LIST;
+        }
+
+        netUtil(params, url, "post", getNewsList);
 
     });
 
@@ -68,6 +86,21 @@ $(document).ready(function() {
 
         return false;
 
+    });
+
+    //搜索框回车搜索新闻
+    $("#search_input").keydown(function (e) {
+        if (e.keyCode == 13) {
+            searchContent = $("#search_input").val();
+
+            var params = {
+                query_text: searchContent,
+                page_num: page + "",
+                count: count + "",
+                sort_mode: sort_mode
+            };
+            netUtil(params, GET_SEARCH_LIST, "post", getNewsList);
+        }
     });
 
     //按照不同排序方式查询
@@ -99,7 +132,7 @@ $(document).ready(function() {
     var similarityIndex = 0;
     $("#news_list").on("click",".faq-icon, .faq-question", function (e) {
         similarityIndex = $(this).parent().parent().parent().index();
-        var news_id = $(this).attr("title");
+        var news_id = $(this).attr("data-newsid");
         var params = {
             news_id: news_id,
             count: 5 + "",
@@ -124,6 +157,13 @@ $(document).ready(function() {
     });
 
 
+    //获取新闻评论
+    $("#news_list").on("click",".comment_list", function (e) {
+        var news_id = $(this).attr("data-newsid");
+        window.open("comment.html?" + news_id);
+    })
+
+
     /**
      * 回调函数，解析返回的列表数据
      */
@@ -137,7 +177,7 @@ $(document).ready(function() {
             //检索时返回检索时间
             var runTime = data.run_time;
             if(runTime != null) {
-                $("#search-error-container").text("本次检索耗时" + runTime);
+                $("#search-error-container").text("本次检索耗时" + runTime + "s");
             }
 
             for (var index = 0; index < newsList.length; index++) {
@@ -202,17 +242,25 @@ $(document).ready(function() {
         var newsUrl = item.url;
         var time = item.time;
         var commentNum = item.comment_num;
-        var content = item.content;
         var keywords = item.keywords;
         var preview = item.preview;
+        var snippet = item.snippet;
         var source = item.source;
 
         time = time.substr(0, time.length - 3);
         keywords.join("&amp ;");
-        content = content.join("");
-        if(content.length > 140) {
-            content = content.substr(0, 140) + "...";
+
+        if(snippet == "") {
+            snippet = preview;
+            if(snippet.length > 143) {
+                snippet = snippet.substr(0, 140) + "...";
+            }
+        } else {
+            if(snippet.indexOf(searchContent) >= 0) {
+                snippet = snippet.replace(searchContent, "<span class=\"keyword\">" + searchContent + "</span>")
+            }
         }
+
 
         //对来源网站进行中文转换
         switch(source) {
@@ -242,15 +290,15 @@ $(document).ready(function() {
             "<a href=\"{0}\" target=\"_Blank\">{1}</a></h3>" +
             "<div class=\"post-meta clearfix\"><span class=\"date\">{2}</span>" +
             "<span class=\"category\"><a>{3}</a></span>" +
-            "<span class=\"comments\"><a>{4} 评论</a></span>" +
-            "<span class=\"source_website\">{5}</span>" +
+            "<span class=\"comments\"><a class=\"comment_list\" data-newsid=\"{4}\">{5} 评论</a></span>" +
+            "<span class=\"source_website\">{6}</span>" +
             "</div></header>" +
-            "<p title=\"{6}\">{7}</p>" +
-            "<div><div class=\"faq-item\"><span class=\"faq-icon\" title=\"{8}\"></span>" +
+            "<p title=\"{7}\">{8}</p>" +
+            "<div><div class=\"faq-item\"><span class=\"faq-icon\" data-newsid=\"{9}\"></span>" +
             "<h3 class=\"faq-question\"><a>相似新闻推荐</a></h3>" +
             "<div class=\"faq-answer\"><ul></ul></div>" +
             "</div></div>";
-        var articleHtml = stringFormat(article, newsUrl, title, time, keywords, commentNum, source, content, content, news_id);
+        var articleHtml = stringFormat(article, newsUrl, title, time, keywords, news_id, commentNum, source, preview, snippet, news_id);
         $("#news_list").append(articleHtml);
     }
 
@@ -264,7 +312,7 @@ $(document).ready(function() {
         var time = item.time;
         time = time.substr(0, time.length - 3);
         var article = "<li class=\"article-entry image\">" +
-            "<h5><a href=\"{0}\" class=\"news_title\">{1}</a></h5>" +
+            "<h5><a href=\"{0}\" class=\"news_title\" target=\"_Blank\">{1}</a></h5>" +
             "<span class=\"article-meta\">{2}</span>" +
             "</li>";
         var articleHtml = stringFormat(article, newsUrl, title, time);
