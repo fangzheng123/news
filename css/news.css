@@ -1,0 +1,49 @@
+
+
+ul.category_list li a {
+    cursor: pointer;
+}
+
+ul.category_list li a:hover {
+    color: #6392C6;
+}
+
+#pagination {
+    margin-top: 30px;
+}
+
+.lis {
+    list-style-type:none;
+    text-align: left;
+    height: 10px;
+    cursor: pointer;
+}
+
+.lis a{
+    color: #fff;
+}
+
+.hot_title {
+    color: #e54724;
+}
+
+#search-error-container {
+    color: #fff;
+}
+
+.comment_like {
+    float: right;
+    color: #e54724;
+}
+
+.comment_dislike {
+    float: right;
+    color: #000;
+}
+
+.source_website {
+    float: right;
+    color: #000;
+}
+
+
