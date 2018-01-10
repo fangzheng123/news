@@ -1,11 +1,14 @@
 
+a {
+    color: #000;
+}
+
+a:hover {
+    color: #6392C6;
+}
 
 ul.category_list li a {
     cursor: pointer;
-}
-
-ul.category_list li a:hover {
-    color: #6392C6;
 }
 
 #pagination {
